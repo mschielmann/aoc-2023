@@ -9,6 +9,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
+
 @Slf4j
 class Puzzle1Solver
 {
@@ -21,12 +24,12 @@ class Puzzle1Solver
 
     long solvePartOne()
     {
-        return solve(puzzleInput, ElvesDigit::matchesOnlyDigit);
+        return solve(puzzleInput, ElvesDigit::matchesOnlyActualDigit);
     }
 
     long solvePartTwo()
     {
-        return solve(puzzleInput, ElvesDigit::matches);
+        return solve(puzzleInput, ElvesDigit::matchesDigitOrDigitName);
     }
 
     private long solve(final String input, BiFunction<ElvesDigit, String, Boolean> matchingFunction)
@@ -38,23 +41,22 @@ class Puzzle1Solver
 
     private int findFirstDigitIn(String line, BiFunction<ElvesDigit, String, Boolean> matchingFunction)
     {
-        return IntStream
-                .range(0, line.length())
-                .boxed()
-                .map(inputAtIndexToElvesDigit(line, matchingFunction))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No digit found."))
-                .value();
+        return findFirstOccurrenceOfStringUsingTraverseOrderIn(line, naturalOrder(), matchingFunction);
     }
 
-
     private int findLastDigitIn(String line, BiFunction<ElvesDigit, String, Boolean> matchingFunction)
+    {
+        return findFirstOccurrenceOfStringUsingTraverseOrderIn(line, reverseOrder(), matchingFunction);
+    }
+
+    private int findFirstOccurrenceOfStringUsingTraverseOrderIn(String line,
+                                                                Comparator<Integer> indexComparator,
+                                                                BiFunction<ElvesDigit, String, Boolean> matchingFunction)
     {
         return IntStream
                 .range(0, line.length())
                 .boxed()
-                .sorted(Comparator.reverseOrder())
+                .sorted(indexComparator)
                 .map(inputAtIndexToElvesDigit(line, matchingFunction))
                 .filter(Objects::nonNull)
                 .findFirst()
@@ -87,12 +89,12 @@ class Puzzle1Solver
         EIGHT,
         NINE;
 
-        boolean matches(String string)
+        boolean matchesDigitOrDigitName(String string)
         {
             return string.startsWith("" + (ordinal() + 1)) || string.startsWith(name().toLowerCase());
         }
 
-        boolean matchesOnlyDigit(String string)
+        boolean matchesOnlyActualDigit(String string)
         {
             return string.startsWith("" + (ordinal() + 1));
         }
