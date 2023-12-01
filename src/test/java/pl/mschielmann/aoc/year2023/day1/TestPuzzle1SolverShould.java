@@ -4,15 +4,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TestPuzzle1Should {
+class TestPuzzle1SolverShould {
 
     @Test
     void solvePartOneWithTestData1() {
         // GIVEN
-        Puzzle1 puzzle = new Puzzle1(TEST_INPUT_1);
+        Puzzle1Solver puzzleSolver = new Puzzle1Solver(TEST_INPUT_1);
 
         // WHEN
-        long result = puzzle.solvePartOne();
+        long result = puzzleSolver.solvePartOne();
 
         // THEN
         assertThat(result).isEqualTo(142L);
@@ -21,10 +21,10 @@ class TestPuzzle1Should {
     @Test
     void solvePartTwoWithTestData2() {
         // GIVEN
-        Puzzle1 puzzle = new Puzzle1(TEST_INPUT_2);
+        Puzzle1Solver puzzleSolver = new Puzzle1Solver(TEST_INPUT_2);
 
         // WHEN
-        long result = puzzle.solvePartTwo();
+        long result = puzzleSolver.solvePartTwo();
 
         // THEN
         assertThat(result).isEqualTo(281L);
@@ -33,10 +33,10 @@ class TestPuzzle1Should {
     @Test
     void solvePartOneWithActualData() {
         // GIVEN
-        Puzzle1 puzzle = new Puzzle1(INPUT);
+        Puzzle1Solver puzzleSolver = new Puzzle1Solver(INPUT);
 
         // WHEN
-        long result = puzzle.solvePartOne();
+        long result = puzzleSolver.solvePartOne();
 
         // THEN
         assertThat(result).isEqualTo(56397L);
@@ -45,10 +45,10 @@ class TestPuzzle1Should {
     @Test
     void solvePartTwoWithActualData() {
         // GIVEN
-        Puzzle1 puzzle = new Puzzle1(INPUT);
+        Puzzle1Solver puzzleSolver = new Puzzle1Solver(INPUT);
 
         // WHEN
-        long result = puzzle.solvePartTwo();
+        long result = puzzleSolver.solvePartTwo();
 
         // THEN
         assertThat(result).isEqualTo(55701L);

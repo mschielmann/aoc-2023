@@ -10,10 +10,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
-class Puzzle1 {
+class Puzzle1Solver {
     private final String puzzleInput;
 
-    Puzzle1(String puzzleInput) {
+    Puzzle1Solver(String puzzleInput) {
         this.puzzleInput = puzzleInput;
     }
 
