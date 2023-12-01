@@ -6,70 +6,77 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Slf4j
-class Puzzle1Solver {
+class Puzzle1Solver
+{
     private final String puzzleInput;
 
-    Puzzle1Solver(String puzzleInput) {
+    Puzzle1Solver(String puzzleInput)
+    {
         this.puzzleInput = puzzleInput;
     }
 
-    long solvePartOne() {
-        return solve(puzzleInput, ElfDigit::matchesOnlyDigit);
+    long solvePartOne()
+    {
+        return solve(puzzleInput, ElvesDigit::matchesOnlyDigit);
     }
 
-    long solvePartTwo() {
-        return solve(puzzleInput, ElfDigit::matches);
+    long solvePartTwo()
+    {
+        return solve(puzzleInput, ElvesDigit::matches);
     }
 
-    private long solve(final String input, BiFunction<ElfDigit, String, Boolean> matchingFunction) {
-        long sum = 0;
-        for (String line : input.lines().toList()) {
-            int firstDigit = findFirstDigitIn(line, matchingFunction);
-            int lastDigit = findLastDigitIn(line, matchingFunction);
-            int numberFromDigits = Integer.parseInt("" + firstDigit + lastDigit);
-            sum += numberFromDigits;
-        }
-        return sum;
+    private long solve(final String input, BiFunction<ElvesDigit, String, Boolean> matchingFunction)
+    {
+        return input.lines()
+                .map(line -> findFirstDigitIn(line, matchingFunction) * 10 + findLastDigitIn(line, matchingFunction))
+                .reduce(0, Integer::sum);
     }
 
-    private int findFirstDigitIn(String line, BiFunction<ElfDigit, String, Boolean> matchingFunction) {
-        Stream<Integer> lastToFirstIndexNumbers = IntStream
-                .range(0, line.length())
-                .boxed();
-        return findFirstOccurrence(line, lastToFirstIndexNumbers, matchingFunction);
-    }
-
-    private int findLastDigitIn(String line, BiFunction<ElfDigit, String, Boolean> matchingFunction) {
-        Stream<Integer> lastToFirstIndexNumbers = IntStream
+    private int findFirstDigitIn(String line, BiFunction<ElvesDigit, String, Boolean> matchingFunction)
+    {
+        return IntStream
                 .range(0, line.length())
                 .boxed()
-                .sorted(Comparator.reverseOrder());
-        return findFirstOccurrence(line, lastToFirstIndexNumbers, matchingFunction);
-    }
-
-    private int findFirstOccurrence(String line, Stream<Integer> indexStream, BiFunction<ElfDigit, String, Boolean> matchingFunction) {
-        var result = indexStream
-                .map(
-                        index -> {
-                            String substring = line.substring(index);
-                            return Arrays.stream(ElfDigit.values())
-                                    .filter(digit -> matchingFunction.apply(digit, substring))
-                                    .findFirst()
-                                    .orElse(null);
-                        })
+                .map(inputAtIndexToElvesDigit(line, matchingFunction))
                 .filter(Objects::nonNull)
-                .findFirst();
-        if (result.isPresent()) {
-            return result.get().value();
-        }
-        throw new IllegalStateException("No digit found.");
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No digit found."))
+                .value();
     }
 
-    private enum ElfDigit {
+
+    private int findLastDigitIn(String line, BiFunction<ElvesDigit, String, Boolean> matchingFunction)
+    {
+        return IntStream
+                .range(0, line.length())
+                .boxed()
+                .sorted(Comparator.reverseOrder())
+                .map(inputAtIndexToElvesDigit(line, matchingFunction))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No digit found."))
+                .value();
+    }
+
+    private Function<Integer, ElvesDigit> inputAtIndexToElvesDigit(String line,
+                                                                   BiFunction<ElvesDigit, String, Boolean> matchingFunction)
+    {
+        return index ->
+        {
+            String substring = line.substring(index);
+            return Arrays.stream(ElvesDigit.values())
+                    .filter(digit -> matchingFunction.apply(digit, substring))
+                    .findFirst()
+                    .orElse(null);
+        };
+    }
+
+    private enum ElvesDigit
+    {
         ONE,
         TWO,
         THREE,
@@ -80,15 +87,18 @@ class Puzzle1Solver {
         EIGHT,
         NINE;
 
-        boolean matches(String string) {
+        boolean matches(String string)
+        {
             return string.startsWith("" + (ordinal() + 1)) || string.startsWith(name().toLowerCase());
         }
 
-        boolean matchesOnlyDigit(String string) {
+        boolean matchesOnlyDigit(String string)
+        {
             return string.startsWith("" + (ordinal() + 1));
         }
 
-        int value() {
+        int value()
+        {
             return ordinal() + 1;
         }
     }
