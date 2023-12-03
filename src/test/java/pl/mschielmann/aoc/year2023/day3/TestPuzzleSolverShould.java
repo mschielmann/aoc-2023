@@ -4,14 +4,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TestPuzzle3SolverShould
+class TestPuzzleSolverShould
 {
 
     @Test
     void solvePartOneWithTestData1()
     {
         // GIVEN
-        Puzzle3Solver puzzleSolver = new Puzzle3Solver(TEST_INPUT_1);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1);
 
         // WHEN
         long result = puzzleSolver.solvePartOne();
@@ -24,7 +24,7 @@ class TestPuzzle3SolverShould
     void solvePartTwoWithTestData2()
     {
         // GIVEN
-        Puzzle3Solver puzzleSolver = new Puzzle3Solver(TEST_INPUT_2);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_2);
 
         // WHEN
         long result = puzzleSolver.solvePartTwo();
@@ -37,7 +37,7 @@ class TestPuzzle3SolverShould
     void solvePartOneWithActualData()
     {
         // GIVEN
-        Puzzle3Solver puzzleSolver = new Puzzle3Solver(INPUT);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT);
 
         // WHEN
         long result = puzzleSolver.solvePartOne();
@@ -50,7 +50,7 @@ class TestPuzzle3SolverShould
     void solvePartTwoWithActualData()
     {
         // GIVEN
-        Puzzle3Solver puzzleSolver = new Puzzle3Solver(INPUT);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT);
 
         // WHEN
         long result = puzzleSolver.solvePartTwo();

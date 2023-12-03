@@ -3,11 +3,11 @@ package pl.mschielmann.aoc.year2023.day4;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-class Puzzle4Solver
+class PuzzleSolver
 {
     private final String puzzleInput;
 
-    Puzzle4Solver(String puzzleInput)
+    PuzzleSolver(String puzzleInput)
     {
         this.puzzleInput = puzzleInput;
     }

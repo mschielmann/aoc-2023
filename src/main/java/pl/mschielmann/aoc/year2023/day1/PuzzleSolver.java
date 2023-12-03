@@ -13,11 +13,11 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;
 
 @Slf4j
-class Puzzle1Solver
+class PuzzleSolver
 {
     private final String puzzleInput;
 
-    Puzzle1Solver(String puzzleInput)
+    PuzzleSolver(String puzzleInput)
     {
         this.puzzleInput = puzzleInput;
     }

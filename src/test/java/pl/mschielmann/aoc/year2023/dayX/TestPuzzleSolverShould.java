@@ -1,17 +1,17 @@
-package pl.mschielmann.aoc.year2023.day4;
+package pl.mschielmann.aoc.year2023.dayX;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TestPuzzle4SolverShould
+class TestPuzzleSolverShould
 {
 
     @Test
     void solvePartOneWithTestData1()
     {
         // GIVEN
-        Puzzle4Solver puzzleSolver = new Puzzle4Solver(TEST_INPUT_1);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1);
 
         // WHEN
         int result = puzzleSolver.solvePartOne();
@@ -24,7 +24,7 @@ class TestPuzzle4SolverShould
     void solvePartTwoWithTestData2()
     {
         // GIVEN
-        Puzzle4Solver puzzleSolver = new Puzzle4Solver(TEST_INPUT_2);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_2);
 
         // WHEN
         int result = puzzleSolver.solvePartTwo();
@@ -37,7 +37,7 @@ class TestPuzzle4SolverShould
     void solvePartOneWithActualData()
     {
         // GIVEN
-        Puzzle4Solver puzzleSolver = new Puzzle4Solver(INPUT);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT);
 
         // WHEN
         int result = puzzleSolver.solvePartOne();
@@ -50,7 +50,7 @@ class TestPuzzle4SolverShould
     void solvePartTwoWithActualData()
     {
         // GIVEN
-        Puzzle4Solver puzzleSolver = new Puzzle4Solver(INPUT);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT);
 
         // WHEN
         int result = puzzleSolver.solvePartTwo();

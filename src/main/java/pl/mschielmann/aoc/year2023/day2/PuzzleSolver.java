@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import static java.util.Comparator.naturalOrder;
 
 @Slf4j
-class Puzzle2Solver
+class PuzzleSolver
 {
     private static final Map<Colour, Integer> CUBES_COUNT = Map.of(
             Colour.RED, 12,
@@ -25,7 +25,7 @@ class Puzzle2Solver
 
     private final String puzzleInput;
 
-    Puzzle2Solver(String puzzleInput)
+    PuzzleSolver(String puzzleInput)
     {
         this.puzzleInput = puzzleInput;
     }

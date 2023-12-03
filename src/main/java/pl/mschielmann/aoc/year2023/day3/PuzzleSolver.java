@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-class Puzzle3Solver
+class PuzzleSolver
 {
     private static final Pattern NON_DIGIT_PATTERN = Pattern.compile("[^\\d.\\r\\n]");
     private static final Pattern GEAR_PATTERN = Pattern.compile("\\*");
@@ -21,7 +21,7 @@ class Puzzle3Solver
     private final String puzzleInput;
     private final int lineLength;
 
-    Puzzle3Solver(String puzzleInput)
+    PuzzleSolver(String puzzleInput)
     {
         this.puzzleInput = puzzleInput;
         lineLength = puzzleInput.lines().toList().get(0).length() + 1;
