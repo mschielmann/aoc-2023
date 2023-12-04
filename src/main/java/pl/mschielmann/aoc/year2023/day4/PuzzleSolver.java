@@ -2,11 +2,16 @@ package pl.mschielmann.aoc.year2023.day4;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -35,22 +40,19 @@ class PuzzleSolver
                 .map(ScratchCard::createScratchCardOf)
                 .collect(Collectors.toMap(ScratchCard::id, Function.identity()));
 
-        List<ScratchCard> scratchCardsToProcess = new LinkedList<>(scratchCardsById.values());
-        long numberOfCardsCollected = scratchCardsToProcess.size();
-        while (!scratchCardsToProcess.isEmpty())
-        {
-            ScratchCard currentCard = scratchCardsToProcess.remove(0);
-            int numberOfCardsAdded = scratchCardsToProcess.size();
-            long newToProcess = currentCard.numberOfWinningCandidateCards();
-            for (int counter = 1; counter <= newToProcess; counter++)
-            {
-                scratchCardsToProcess.add(scratchCardsById.get(currentCard.id + counter));
-            }
-            numberOfCardsAdded = scratchCardsToProcess.size() - numberOfCardsAdded;
-            numberOfCardsCollected += numberOfCardsAdded;
-        }
+        Map<Long, AtomicLong> scratchCardsToProcess = scratchCardsById.values().stream()
+                .collect(Collectors.toMap(ScratchCard::id, card -> new AtomicLong(1L)));
 
-        return numberOfCardsCollected;
+        Collection<ScratchCard> scratchCardsAtBeginning = scratchCardsById.values();
+        scratchCardsAtBeginning.forEach(card ->
+            LongStream.range(card.id + 1, card.id + card.numberOfWinningCandidateCards() + 1)
+                    .forEach(index -> scratchCardsToProcess.get(index).addAndGet(scratchCardsToProcess.get(card.id).longValue()))
+        );
+
+        return scratchCardsToProcess.values().stream()
+                .map(AtomicLong::get)
+                .mapToLong(Long::valueOf)
+                .sum();
     }
 
 
