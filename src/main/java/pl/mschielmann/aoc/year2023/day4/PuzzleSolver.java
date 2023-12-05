@@ -2,15 +2,10 @@ package pl.mschielmann.aoc.year2023.day4;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -36,17 +31,16 @@ class PuzzleSolver
 
     long solvePartTwo()
     {
-        Map<Long, ScratchCard> scratchCardsById = puzzleInput.lines()
+        List<ScratchCard> scratchCardsAtBeginning = puzzleInput.lines()
                 .map(ScratchCard::createScratchCardOf)
-                .collect(Collectors.toMap(ScratchCard::id, Function.identity()));
+                .toList();
 
-        Map<Long, AtomicLong> scratchCardsToProcess = scratchCardsById.values().stream()
+        Map<Long, AtomicLong> scratchCardsToProcess = scratchCardsAtBeginning.stream()
                 .collect(Collectors.toMap(ScratchCard::id, card -> new AtomicLong(1L)));
 
-        Collection<ScratchCard> scratchCardsAtBeginning = scratchCardsById.values();
         scratchCardsAtBeginning.forEach(card ->
-            LongStream.range(card.id + 1, card.id + card.numberOfWinningCandidateCards() + 1)
-                    .forEach(index -> scratchCardsToProcess.get(index).addAndGet(scratchCardsToProcess.get(card.id).longValue()))
+                LongStream.range(card.id + 1, card.id + card.numberOfWinningCandidateCards() + 1)
+                        .forEach(index -> scratchCardsToProcess.get(index).addAndGet(scratchCardsToProcess.get(card.id).longValue()))
         );
 
         return scratchCardsToProcess.values().stream()

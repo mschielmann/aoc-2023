@@ -1,4 +1,4 @@
-package pl.mschielmann.aoc.year2023.dayX;
+package pl.mschielmann.aoc.year2023.day6;
 
 import lombok.extern.slf4j.Slf4j;
 
