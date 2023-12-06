@@ -1,6 +1,5 @@
 package pl.mschielmann.aoc.year2023.day6;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pl.mschielmann.aoc.year2023.day6.PuzzleSolver.RaceInfo;
 
