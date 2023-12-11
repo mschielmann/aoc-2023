@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +42,7 @@ class PuzzleSolver
             Direction.SOUTH, Direction.EAST,
             Direction.EAST, Direction.SOUTH
     );
-    ;
+
     private static final Map<PipeShape, Map<Direction, Direction>> SHAPE_TO_DIRECTION_MAPPINGS = Map.of(
             PipeShape.NORTH_EAST, NORTH_EAST_MAPPINGS,
             PipeShape.NORTH_WEST, NORTH_WEST_MAPPINGS,
@@ -58,88 +59,63 @@ class PuzzleSolver
 
     long solvePartOne()
     {
-        Pipeline pipeline = Pipeline.buildUsing(puzzleInput);
-        List<Pipe> pipesSurroundingStart = pipeline.getPipesSurroundingStart();
-
-        log.info("Surrounding start {}", pipeline.getPipesSurroundingStart());
-        Set<Pipe> pipesInLoop = findAllPipesInTheLoopBasedOn(pipesSurroundingStart, pipeline);
+        List<Pipe> pipesInLoop = findPipesInTheLoop();
 
         return Double.valueOf(Math.ceil((double) pipesInLoop.size() / 2)).longValue();
     }
 
     long solvePartTwo()
     {
+        List<Pipe> pipesInLoop = findPipesInTheLoop();
+
+        Pipe firstNonHorizontalPipeInLoop = pipesInLoop.stream()
+                .filter(pipe -> !PipeShape.HORIZONTAL.equals(pipe.shape))
+                .min(pipeSortingComparator())
+                .orElseThrow(() -> new IllegalStateException("No not-horizontal pipes found."));
+
+        Pipe currentPipe = findNextInLoop(firstNonHorizontalPipeInLoop, pipesInLoop);
+        Direction insideLoopDirection = firstNonHorizontalPipeInLoop.columnCoordinate < currentPipe.columnCoordinate ? Direction.SOUTH : Direction.EAST;
+
+        Set<Coordinates> coordinatesWithinLoop = new HashSet<>();
+        do
+        {
+            insideLoopDirection = SHAPE_TO_DIRECTION_MAPPINGS.getOrDefault(currentPipe.shape, new HashMap<>())
+                    .getOrDefault(insideLoopDirection, insideLoopDirection);
+            markCoordinatesWithinLoop(insideLoopDirection, currentPipe, coordinatesWithinLoop, pipesInLoop);
+            currentPipe = findNextInLoop(currentPipe, pipesInLoop);
+            markCoordinatesWithinLoop(insideLoopDirection, currentPipe, coordinatesWithinLoop, pipesInLoop);
+        } while (!currentPipe.equals(firstNonHorizontalPipeInLoop));
+
+        return coordinatesWithinLoop.size();
+    }
+
+    private List<Pipe> findPipesInTheLoop()
+    {
         Pipeline pipeline = Pipeline.buildUsing(puzzleInput);
         List<Pipe> pipesSurroundingStart = pipeline.getPipesSurroundingStart();
 
-        log.info("Surrounding start {}", pipeline.getPipesSurroundingStart());
-        Set<Pipe> pipesInLoop = findAllPipesInTheLoopBasedOn(pipesSurroundingStart, pipeline);
-        List<Pipe> pipesInLoopNeighbouringStart = pipesSurroundingStart.stream().filter(pipesInLoop::contains).toList();
-        PipeShape startPipeShape = startPipeShape(pipesInLoopNeighbouringStart.get(0), pipesInLoopNeighbouringStart.get(1));
-        pipesInLoop.add(pipeline.getStartingPipe());
-        Pipe firstNonHorizontalPipeInLoop = pipesInLoop.stream()
-                .sorted(pipeSortingComparator())
-                .filter(pipe -> (pipe.isStart && !PipeShape.HORIZONTAL.equals(startPipeShape)) || !PipeShape.HORIZONTAL.equals(pipe.shape))
-                .findFirst()
-                .orElseThrow();
+        return findAllPipesInTheLoopBasedOn(pipesSurroundingStart, pipeline);
+    }
 
-        Pipe previousPipe = firstNonHorizontalPipeInLoop;
-        Pipe currentPipe = firstNonHorizontalPipeInLoop.isStart ? pipesInLoopNeighbouringStart.get(0) : pipeline.findNextFor(firstNonHorizontalPipeInLoop, firstNonHorizontalPipeInLoop).orElseThrow();
-        Set<Coordinates> inCoordinates = new HashSet<>();
-
-        Direction inDirection = previousPipe.columnCoordinate < currentPipe.columnCoordinate ? Direction.SOUTH : Direction.EAST;
-        addAllEastTo(currentPipe, inCoordinates, pipesInLoop);
-        do
+    private Pipe findNextInLoop(Pipe currentPipe, List<Pipe> pipesInLoop)
+    {
+        int currentIndex = pipesInLoop.indexOf(currentPipe);
+        if (currentIndex == pipesInLoop.size() - 1)
         {
-            PipeShape pipeShape = currentPipe.shape;
-            if (currentPipe.columnCoordinate == 8 && currentPipe.rowCoordinate == 3)
-            {
-                System.out.println("here");
-            }
-            if (pipeShape == null)
-            {
-                Pipe finalPreviousPipe = previousPipe;
-                Pipe nextPipe = pipesSurroundingStart.stream()
-                        .filter(pipe -> !pipe.equals(finalPreviousPipe))
-                        .filter(pipesInLoop::contains)
-                        .findFirst().orElseThrow();
-                pipeShape = startPipeShape(previousPipe, nextPipe);
+            return pipesInLoop.get(0);
+        }
+        return pipesInLoop.get(currentIndex + 1);
+    }
 
-            }
-            switch (inDirection)
-            {
-                case EAST -> addAllEastTo(currentPipe, inCoordinates, pipesInLoop);
-                case NORTH -> addAllNorthTo(currentPipe, inCoordinates, pipesInLoop);
-                case SOUTH -> addAllSouthTo(currentPipe, inCoordinates, pipesInLoop);
-                case WEST -> addAllWestTo(currentPipe, inCoordinates, pipesInLoop);
-            }
-            inDirection = SHAPE_TO_DIRECTION_MAPPINGS.getOrDefault(pipeShape, new HashMap<>())
-                    .getOrDefault(inDirection, inDirection);
-            //log.info("NEW IN DIRECTION: {}",  inDirection);
-            switch (inDirection)
-            {
-                case EAST -> addAllEastTo(currentPipe, inCoordinates, pipesInLoop);
-                case NORTH -> addAllNorthTo(currentPipe, inCoordinates, pipesInLoop);
-                case SOUTH -> addAllSouthTo(currentPipe, inCoordinates, pipesInLoop);
-                case WEST -> addAllWestTo(currentPipe, inCoordinates, pipesInLoop);
-            }
-            Pipe tempPipe = currentPipe;
-            if (currentPipe.isStart())
-            {
-                Pipe finalPreviousPipe = previousPipe;
-                currentPipe = pipesSurroundingStart.stream()
-                        .filter(pipe -> !pipe.equals(finalPreviousPipe))
-                        .filter(pipesInLoop::contains)
-                        .findFirst().orElseThrow();
-            } else
-            {
-                currentPipe = pipeline.findNextFor(currentPipe, previousPipe).orElseThrow();
-            }
-            previousPipe = tempPipe;
-        } while (!currentPipe.equals(firstNonHorizontalPipeInLoop));
-
-        log.info("{}", inCoordinates);
-        return inCoordinates.size();
+    private void markCoordinatesWithinLoop(Direction inDirection, Pipe currentPipe, Set<Coordinates> inCoordinates, List<Pipe> pipesInLoop)
+    {
+        switch (inDirection)
+        {
+            case EAST -> addAllEastTo(currentPipe, inCoordinates, pipesInLoop);
+            case NORTH -> addAllNorthTo(currentPipe, inCoordinates, pipesInLoop);
+            case SOUTH -> addAllSouthTo(currentPipe, inCoordinates, pipesInLoop);
+            case WEST -> addAllWestTo(currentPipe, inCoordinates, pipesInLoop);
+        }
     }
 
     private PipeShape startPipeShape(Pipe previousPipe, Pipe nextPipe)
@@ -166,94 +142,77 @@ class PuzzleSolver
         return null;
     }
 
-    private void addAllEastTo(Pipe currentPipe, Set<Coordinates> inCoordinates, Set<Pipe> pipesInLoop)
+    private void addAllEastTo(Pipe currentPipe, Set<Coordinates> inCoordinates, List<Pipe> pipesInLoop)
     {
         int currentColumn = currentPipe.columnCoordinate + 1;
-        while (true)
+        while (notOtherLoopPipe(currentPipe.rowCoordinate, currentColumn, pipesInLoop))
         {
-            int column = currentColumn;
-            if (pipesInLoop.stream().anyMatch(pipe -> pipe.columnCoordinate.equals(column) && pipe.rowCoordinate().equals(currentPipe.rowCoordinate())))
-            {
-                break;
-            }
             inCoordinates.add(new Coordinates(currentPipe.rowCoordinate(), currentColumn++));
-            log.info("Adding coordinates1: " + new Coordinates(currentPipe.rowCoordinate(), currentColumn - 1));
         }
     }
 
-    private void addAllWestTo(Pipe currentPipe, Set<Coordinates> inCoordinates, Set<Pipe> pipesInLoop)
+    private void addAllWestTo(Pipe currentPipe, Set<Coordinates> inCoordinates, List<Pipe> pipesInLoop)
     {
         int currentColumn = currentPipe.columnCoordinate - 1;
-        while (true)
+        while (notOtherLoopPipe(currentPipe.rowCoordinate, currentColumn, pipesInLoop))
         {
-            int column = currentColumn;
-            if (pipesInLoop.stream().anyMatch(pipe -> pipe.columnCoordinate.equals(column) && pipe.rowCoordinate().equals(currentPipe.rowCoordinate())))
-            {
-                break;
-            }
             inCoordinates.add(new Coordinates(currentPipe.rowCoordinate(), currentColumn--));
-            log.info("Adding coordinates2: " + new Coordinates(currentPipe.rowCoordinate(), currentColumn + 1));
         }
     }
 
-    private void addAllNorthTo(Pipe currentPipe, Set<Coordinates> inCoordinates, Set<Pipe> pipesInLoop)
+    private void addAllNorthTo(Pipe currentPipe, Set<Coordinates> inCoordinates, List<Pipe> pipesInLoop)
     {
         int currentRow = currentPipe.rowCoordinate - 1;
-        while (true)
+        while (notOtherLoopPipe(currentRow, currentPipe.columnCoordinate(), pipesInLoop))
         {
-            int row = currentRow;
-            if (pipesInLoop.stream().anyMatch(pipe -> pipe.rowCoordinate.equals(row) && pipe.columnCoordinate().equals(currentPipe.columnCoordinate())))
-            {
-                break;
-            }
-            inCoordinates.add(new Coordinates(currentRow--, currentPipe.columnCoordinate));
-            log.info("Adding coordinates3: " + new Coordinates(currentRow + 1, currentPipe.columnCoordinate));
+            inCoordinates.add(new Coordinates(currentRow--, currentPipe.columnCoordinate()));
         }
     }
 
-    private void addAllSouthTo(Pipe currentPipe, Set<Coordinates> inCoordinates, Set<Pipe> pipesInLoop)
+    private void addAllSouthTo(Pipe currentPipe, Set<Coordinates> inCoordinates, List<Pipe> pipesInLoop)
     {
         int currentRow = currentPipe.rowCoordinate + 1;
-        while (true)
+        while (notOtherLoopPipe(currentRow, currentPipe.columnCoordinate(), pipesInLoop))
         {
-            int row = currentRow;
-            if (pipesInLoop.stream().anyMatch(pipe -> pipe.rowCoordinate.equals(row) && pipe.columnCoordinate().equals(currentPipe.columnCoordinate())))
-            {
-                break;
-            }
-            inCoordinates.add(new Coordinates(currentRow++, currentPipe.columnCoordinate));
-            log.info("Adding coordinates4: " + new Coordinates(currentRow - 1, currentPipe.columnCoordinate));
+            inCoordinates.add(new Coordinates(currentRow++, currentPipe.columnCoordinate()));
         }
     }
 
-    private Set<Pipe> findAllPipesInTheLoopBasedOn(List<Pipe> pipesSurroundingStart, Pipeline pipeline)
+    private boolean notOtherLoopPipe(int rowCoordinate, int columnCoordinate, List<Pipe> pipesInLoop)
     {
-        Set<Pipe> pipesInLoop = new HashSet<>();
-        for (Pipe pipe : pipesSurroundingStart)
+        return pipesInLoop.stream().noneMatch(pipe -> rowCoordinate == pipe.rowCoordinate() && columnCoordinate == pipe.columnCoordinate());
+    }
+
+    private List<Pipe> findAllPipesInTheLoopBasedOn(List<Pipe> pipesSurroundingStart, Pipeline pipeline)
+    {
+        List<Pipe> pipesInLoop = new LinkedList<>();
+        for (Pipe startNeighbourPipe : pipesSurroundingStart)
         {
             Pipe previousPipe = pipeline.getStartingPipe();
-            Optional<Pipe> currentPipe = pipeline.findNextFor(pipe, previousPipe);
-            previousPipe = pipe;
-            pipesInLoop = new HashSet<>();
+            Optional<Pipe> currentPipeCandidate = pipeline.findNextFor(startNeighbourPipe, previousPipe);
+            previousPipe = startNeighbourPipe;
+            pipesInLoop = new LinkedList<>();
             pipesInLoop.add(previousPipe);
-            while (currentPipe.isPresent() && !currentPipe.get().isStart)
+            while (currentPipeCandidate.isPresent() && !currentPipeCandidate.get().isStart)
             {
-                pipesInLoop.add(currentPipe.get());
-                Pipe tempPipe = currentPipe.get();
-                currentPipe = pipeline.findNextFor(currentPipe.get(), previousPipe);
-                previousPipe = tempPipe;
+                Pipe currentPipe = currentPipeCandidate.get();
+                pipesInLoop.add(currentPipe);
+                currentPipeCandidate = pipeline.findNextFor(currentPipe, previousPipe);
+                previousPipe = currentPipe;
             }
-            if (currentPipe.isPresent())
+            if (currentPipeCandidate.isPresent())
             {
-                log.info("start found: {}", currentPipe.get());
+                Pipe startPipe = currentPipeCandidate.get();
+                PipeShape pipeShape = startPipeShape(startNeighbourPipe, previousPipe);
+                Pipe startPipeWithShape = new Pipe(pipeShape, startPipe.rowCoordinate, startPipe.columnCoordinate, true);
+                pipesInLoop.add(startPipeWithShape);
                 break;
             }
         }
         return pipesInLoop;
     }
 
-    private record Pipeline(Map<Integer, Map<Integer, Pipe>> grid, Integer startCoordinateRow,
-                            Integer startCoordinateColumn)
+    private record Pipeline(Map<Integer, Map<Integer, Pipe>> grid, Pipe startingPipe)
     {
 
         private Optional<Pipe> northOf(Pipe pipe)
@@ -310,7 +269,7 @@ class PuzzleSolver
 
         private Pipe getStartingPipe()
         {
-            return grid.get(startCoordinateRow).get(startCoordinateColumn);
+            return startingPipe;
         }
 
         public static Pipeline buildUsing(String puzzleInput)
@@ -330,7 +289,6 @@ class PuzzleSolver
                     {
                         startCoordinateRow = rowIndex;
                         startCoordinateColumn = columnIndex;
-                        log.info("Start {}, {}", rowIndex, columnIndex);
                         grid.get(rowIndex).put(columnIndex, new Pipe(null, rowIndex, columnIndex, true));
                         continue;
                     }
@@ -346,7 +304,7 @@ class PuzzleSolver
             requireNonNull(startCoordinateRow, "No starting point found!");
             requireNonNull(startCoordinateColumn, "No starting point found!");
 
-            return new Pipeline(grid, startCoordinateRow, startCoordinateColumn);
+            return new Pipeline(grid, new Pipe(null, startCoordinateRow, startCoordinateColumn, true));
         }
 
     }
@@ -385,7 +343,7 @@ class PuzzleSolver
         EAST,
         WEST,
         SOUTH,
-        NORTH;
+        NORTH
     }
 
     private Comparator<Pipe> pipeSortingComparator()
