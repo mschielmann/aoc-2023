@@ -57,7 +57,7 @@ class TestPuzzleSolverShould
         long result = puzzleSolver.solvePartTwo();
 
         // THEN
-        assertThat(result).isEqualTo(3L);
+        assertThat(result).isEqualTo(4L);
     }
 
     @Test
@@ -109,7 +109,7 @@ class TestPuzzleSolverShould
         long result = puzzleSolver.solvePartTwo();
 
         // THEN
-        assertThat(result).isEqualTo(0L);
+        assertThat(result).isEqualTo(451L);
     }
 
     private static final String TEST_INPUT_1 = """
