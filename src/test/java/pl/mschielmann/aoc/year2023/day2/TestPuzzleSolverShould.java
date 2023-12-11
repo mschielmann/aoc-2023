@@ -21,19 +21,6 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    void solvePartTwoWithTestData2()
-    {
-        // GIVEN
-        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_2);
-
-        // WHEN
-        int result = puzzleSolver.solvePartTwo();
-
-        // THEN
-        assertThat(result).isEqualTo(2286);
-    }
-
-    @Test
     void solvePartOneWithActualData()
     {
         // GIVEN
@@ -44,6 +31,19 @@ class TestPuzzleSolverShould
 
         // THEN
         assertThat(result).isEqualTo(2632);
+    }
+
+    @Test
+    void solvePartTwoWithTestData2()
+    {
+        // GIVEN
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_2);
+
+        // WHEN
+        int result = puzzleSolver.solvePartTwo();
+
+        // THEN
+        assertThat(result).isEqualTo(2286);
     }
 
     @Test

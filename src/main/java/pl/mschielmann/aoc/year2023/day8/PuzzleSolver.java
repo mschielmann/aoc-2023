@@ -80,9 +80,11 @@ class PuzzleSolver
                 {
                     currentNode = nodes.get(currentNode.nextRight);
                 }
-                if (currentNode.isEndForGhosts()) {
+                if (currentNode.isEndForGhosts())
+                {
                     Long numberOfStepsBeforeCycle = stepsToNodeByInstructionsCounter.get(currentNode).getOrDefault(instructions.counter, -1L);
-                    if (numberOfStepsBeforeCycle > 0) {
+                    if (numberOfStepsBeforeCycle > 0)
+                    {
                         log.info("Cycle for node {}, starts after: {}", currentNode.name, steps - stepsToNodeByInstructionsCounter.get(currentNode).get(instructions.counter));
                         break;
                     }
@@ -94,7 +96,11 @@ class PuzzleSolver
         var matchingStepNumber = stepsToNodeByInstructionsCounter.values().stream()
                 .map(Map::values)
                 .peek(value -> log.info("Values: {}", value))
-                .reduce(new ArrayList<>(stepsToNodeByInstructionsCounter.values()).get(0).values(), (partial, current) -> {partial.retainAll(current); return partial;});
+                .reduce(new ArrayList<>(stepsToNodeByInstructionsCounter.values()).get(0).values(), (partial, current) ->
+                {
+                    partial.retainAll(current);
+                    return partial;
+                });
 
         return matchingStepNumber.stream().findFirst().orElse(-1L);
     }
@@ -121,7 +127,8 @@ class PuzzleSolver
             return result;
         }
 
-        private void reset() {
+        private void reset()
+        {
             counter = 0;
         }
     }

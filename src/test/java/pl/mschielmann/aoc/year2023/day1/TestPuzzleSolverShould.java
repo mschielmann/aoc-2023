@@ -8,7 +8,8 @@ class TestPuzzleSolverShould
 {
 
     @Test
-    void solvePartOneWithTestData1() {
+    void solvePartOneWithTestData1()
+    {
         // GIVEN
         PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1);
 
@@ -20,19 +21,8 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    void solvePartTwoWithTestData2() {
-        // GIVEN
-        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_2);
-
-        // WHEN
-        long result = puzzleSolver.solvePartTwo();
-
-        // THEN
-        assertThat(result).isEqualTo(281L);
-    }
-
-    @Test
-    void solvePartOneWithActualData() {
+    void solvePartOneWithActualData()
+    {
         // GIVEN
         PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT);
 
@@ -44,7 +34,21 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    void solvePartTwoWithActualData() {
+    void solvePartTwoWithTestData2()
+    {
+        // GIVEN
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_2);
+
+        // WHEN
+        long result = puzzleSolver.solvePartTwo();
+
+        // THEN
+        assertThat(result).isEqualTo(281L);
+    }
+
+    @Test
+    void solvePartTwoWithActualData()
+    {
         // GIVEN
         PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT);
 

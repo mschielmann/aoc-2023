@@ -9,10 +9,10 @@ class TestPuzzleSolverShould
 {
 
     @Test
-    void solvePartOneWithTestData1WithScaleOf2()
+    void solvePartOneWithTestDataWithScaleOf2()
     {
         // GIVEN
-        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1, 2L);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT, 2L);
 
         // WHEN
         long result = puzzleSolver.solve();
@@ -35,10 +35,10 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    void solvePartTwoWithTestData1WithScaleOf10()
+    void solvePartTwoWithTestDataWithScaleOf10()
     {
         // GIVEN
-        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1, 10L);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT, 10L);
 
         // WHEN
         long result = puzzleSolver.solve();
@@ -48,10 +48,10 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    void solvePartTwoWithTestData1WithScaleOf100()
+    void solvePartTwoWithTestDataWithScaleOf100()
     {
         // GIVEN
-        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1, 100L);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT, 100L);
 
         // WHEN
         long result = puzzleSolver.solve();
@@ -73,7 +73,7 @@ class TestPuzzleSolverShould
         assertThat(result).isEqualTo(512240933238L);
     }
 
-    private static final String TEST_INPUT_1 = """
+    private static final String TEST_INPUT = """
             ...#......
             .......#..
             #.........

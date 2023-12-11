@@ -104,7 +104,8 @@ class PuzzleSolver
             {
                 String thisCardCharacter = hand.substring(index, index + 1);
                 String otherCardCharacter = other.hand.substring(index, index + 1);
-                if (jokersUsed) {
+                if (jokersUsed)
+                {
                     thisCardCharacter = thisCardCharacter.equals(CardType.JACK.symbol) ? CardType.JOKER.symbol : thisCardCharacter;
                     otherCardCharacter = otherCardCharacter.equals(CardType.JACK.symbol) ? CardType.JOKER.symbol : otherCardCharacter;
                 }

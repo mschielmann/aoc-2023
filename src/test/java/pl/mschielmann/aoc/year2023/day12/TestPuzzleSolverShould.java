@@ -1,4 +1,4 @@
-package pl.mschielmann.aoc.year2023.dayX;
+package pl.mschielmann.aoc.year2023.day12;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
