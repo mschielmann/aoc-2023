@@ -3,7 +3,10 @@ package pl.mschielmann.aoc.year2023.day11;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 @Slf4j
 class PuzzleSolver
@@ -11,103 +14,81 @@ class PuzzleSolver
     private final String puzzleInput;
     private final long scaleIndex;
 
-    PuzzleSolver(String puzzleInput, long scaleIndex)
+    PuzzleSolver(String spaceMap, long emptySpaceScaleIndex)
     {
-        this.puzzleInput = puzzleInput;
-        this.scaleIndex = scaleIndex;
+        this.puzzleInput = spaceMap;
+        this.scaleIndex = emptySpaceScaleIndex;
     }
 
-    long solvePartOne()
+    long solve()
     {
         GalaxyMap galaxyMap = GalaxyMap.buildGalaxy(puzzleInput);
 
-        log.info("{}", galaxyMap.galaxiesWithCoordinates);
         long distance = 0;
-        for (int galaxyIndex = 0; galaxyIndex < galaxyMap.galaxiesWithCoordinates.size(); galaxyIndex++) {
+        for (int galaxyIndex = 0; galaxyIndex < galaxyMap.galaxiesWithCoordinates.size(); galaxyIndex++)
+        {
             Galaxy galaxy = galaxyMap.galaxiesWithCoordinates.get(galaxyIndex);
-            for (int neighbourGalaxyIndex = galaxyIndex + 1; neighbourGalaxyIndex < galaxyMap.galaxiesWithCoordinates.size(); neighbourGalaxyIndex++) {
+            for (int neighbourGalaxyIndex = galaxyIndex + 1; neighbourGalaxyIndex < galaxyMap.galaxiesWithCoordinates.size(); neighbourGalaxyIndex++)
+            {
                 Galaxy neighbour = galaxyMap.galaxiesWithCoordinates.get(neighbourGalaxyIndex);
-                int startingGalaxyRowIndex = Math.min(galaxy.row, neighbour.row);
-                for (int rowIndex = startingGalaxyRowIndex + 1; rowIndex <= startingGalaxyRowIndex + Math.abs(galaxy.row - neighbour.row); rowIndex++) {
-                    if (galaxyMap.scaledRows.contains(rowIndex)) {
-                        distance += scaleIndex;
-                    } else {
-                        distance += 1;
-                    }
-                }
-                int startingGalaxyColumnIndex = Math.min(galaxy.column, neighbour.column);
-                for (int columnIndex = startingGalaxyColumnIndex + 1; columnIndex <= startingGalaxyColumnIndex + Math.abs(galaxy.column - neighbour.column); columnIndex++) {
-                    if (galaxyMap.scaledColumns.contains(columnIndex)) {
-                        distance += scaleIndex;
-                    } else {
-                        distance += 1;
-                    }
-                }
+                distance += calculateDistance(galaxy.row, neighbour.row, galaxyMap.rowsWithoutGalaxies);
+                distance += calculateDistance(galaxy.column, neighbour.column, galaxyMap.columnsWithoutGalaxies);
             }
         }
         return distance;
     }
 
-    long solvePartTwo()
+    private long calculateDistance(int galaxyCoordinate, int neighbourCoordinate, List<Integer> scaledCoordinates)
     {
-        return -1;
+        int startingGalaxyRowIndex = Math.min(galaxyCoordinate, neighbourCoordinate);
+        return IntStream.range(startingGalaxyRowIndex + 1, startingGalaxyRowIndex + 1 + Math.abs(galaxyCoordinate - neighbourCoordinate))
+                .boxed()
+                .reduce(0L, (partial, index) -> partial + (scaledCoordinates.contains(index) ? scaleIndex : 1L), Long::sum);
     }
 
-    private record GalaxyMap(List<List<Integer>> map, List<Galaxy> galaxiesWithCoordinates, List<Integer> scaledRows,
-                             List<Integer> scaledColumns) {
+    private record GalaxyMap(List<Galaxy> galaxiesWithCoordinates,
+                             List<Integer> rowsWithoutGalaxies,
+                             List<Integer> columnsWithoutGalaxies)
+    {
 
-        private static GalaxyMap buildGalaxy(String input) {
-            List<List<Integer>> map = new ArrayList<>();
-            List<Integer> scaledRows = new ArrayList<>();
-            int rowIndex = 0;
-            for(String line : input.lines().toList()) {
-                boolean galaxiesInRow = false;
-                List<Integer> row = new ArrayList<>();
-                for(int index = 0; index < line.length(); index++) {
-                    boolean isGalaxy = line.charAt(index) == '#';
-                    if (isGalaxy) {
-                        galaxiesInRow = true;
-                    }
-                    row.add(isGalaxy ? 1 : 0);
-                }
-                map.add(row);
-                if (!galaxiesInRow) {
-                    scaledRows.add(rowIndex);
-                }
-                rowIndex++;
-            }
+        private static final char GALAXY_SYMBOL = '#';
 
-            List<Integer> scaledColumns = new ArrayList<>();
-            int numberOfColumns = map.get(0).size();
-            for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-                boolean galaxiesInColumn = false;
-                for (List<Integer> row : map)
-                {
-                    if (row.get(columnIndex) == 1)
-                    {
-                        galaxiesInColumn = true;
-                        break;
-                    }
-                }
-                if (!galaxiesInColumn) {
-                    scaledColumns.add(columnIndex);
-                }
-            }
+        private static GalaxyMap buildGalaxy(String input)
+        {
+            List<String> lines = input.lines().toList();
+            int rowCount = lines.size();
+            int columnCount = lines.get(0).length();
 
             List<Galaxy> galaxiesWithCoordinates = new ArrayList<>();
-            for (int row = 0; row < map.size(); row++) {
-                for (int column = 0; column < map.get(row).size(); column++)
+            Set<Integer> rowsWithGalaxies = new HashSet<>();
+            Set<Integer> columnWithGalaxies = new HashSet<>();
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+            {
+                String line = lines.get(rowIndex);
+                for (int columnIndex = 0; columnIndex < columnCount; columnIndex++)
                 {
-                    if (map.get(row).get(column) == 1) {
-                        galaxiesWithCoordinates.add(new Galaxy(row, column));
+                    if (line.charAt(columnIndex) == GALAXY_SYMBOL)
+                    {
+                        galaxiesWithCoordinates.add(new Galaxy(rowIndex, columnIndex));
+                        rowsWithGalaxies.add(rowIndex);
+                        columnWithGalaxies.add(columnIndex);
                     }
                 }
             }
-            return new GalaxyMap(map, galaxiesWithCoordinates, scaledRows, scaledColumns);
+
+            List<Integer> rowsWithoutGalaxies = IntStream.range(0, rowCount)
+                    .filter(index -> !rowsWithGalaxies.contains(index))
+                    .boxed().toList();
+            List<Integer> columnWithoutGalaxies = IntStream.range(0, columnCount)
+                    .filter(index -> !columnWithGalaxies.contains(index))
+                    .boxed().toList();
+
+            return new GalaxyMap(galaxiesWithCoordinates, rowsWithoutGalaxies, columnWithoutGalaxies);
         }
     }
 
-    record Galaxy(int row, int column) {
+    record Galaxy(int row, int column)
+    {
 
     }
 }

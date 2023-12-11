@@ -9,13 +9,13 @@ class TestPuzzleSolverShould
 {
 
     @Test
-    void solvePartOneWithTestData1()
+    void solvePartOneWithTestData1WithScaleOf2()
     {
         // GIVEN
         PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1, 2L);
 
         // WHEN
-        long result = puzzleSolver.solvePartOne();
+        long result = puzzleSolver.solve();
 
         // THEN
         assertThat(result).isEqualTo(374L);
@@ -28,33 +28,33 @@ class TestPuzzleSolverShould
         PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT, 2L);
 
         // WHEN
-        long result = puzzleSolver.solvePartOne();
+        long result = puzzleSolver.solve();
 
         // THEN
         assertThat(result).isEqualTo(9957702L);
     }
 
     @Test
-    void solvePartTwoWithTestData2()
+    void solvePartTwoWithTestData1WithScaleOf10()
     {
         // GIVEN
         PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1, 10L);
 
         // WHEN
-        long result = puzzleSolver.solvePartOne();
+        long result = puzzleSolver.solve();
 
         // THEN
         assertThat(result).isEqualTo(1030L);
     }
 
     @Test
-    void solvePartTwoWithTestData3()
+    void solvePartTwoWithTestData1WithScaleOf100()
     {
         // GIVEN
         PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT_1, 100L);
 
         // WHEN
-        long result = puzzleSolver.solvePartOne();
+        long result = puzzleSolver.solve();
 
         // THEN
         assertThat(result).isEqualTo(8410L);
@@ -67,7 +67,7 @@ class TestPuzzleSolverShould
         PuzzleSolver puzzleSolver = new PuzzleSolver(INPUT, 1000000L);
 
         // WHEN
-        long result = puzzleSolver.solvePartOne();
+        long result = puzzleSolver.solve();
 
         // THEN
         assertThat(result).isEqualTo(512240933238L);
@@ -84,10 +84,6 @@ class TestPuzzleSolverShould
             ..........
             .......#..
             #...#.....
-            """;
-
-    private static final String TEST_INPUT_2 = """
-                        
             """;
 
     static final String INPUT = """
