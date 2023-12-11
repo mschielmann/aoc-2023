@@ -2,6 +2,8 @@ package pl.mschielmann.aoc.year2023.day8;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,14 +63,40 @@ class PuzzleSolver
         Set<Node> endNodes = nodes.values().stream().filter(Node::isEndForGhosts).collect(Collectors.toSet());
         log.info("End nodes: {}", endNodes.stream().map(node -> node.name).toList());
 
+        Map<Node, Map<Long, Long>> stepsToNodeByInstructionsCounter = endNodes.stream()
+                .collect(Collectors.toMap(Function.identity(), (ignored) -> new HashMap<>()));
         for (Node startingNode : startNodes)
         {
             long steps = 0L;
-            Map<Node, Long> stepsToNode = nodes.values().stream().collect(Collectors.toMap(Function.identity(), (ignored) -> 0L));
+            instructions.reset();
             Node currentNode = startingNode;
+            while (true)
+            {
+                steps++;
+                if (instructions.nextIsLeft())
+                {
+                    currentNode = nodes.get(currentNode.nextLeft);
+                } else
+                {
+                    currentNode = nodes.get(currentNode.nextRight);
+                }
+                if (currentNode.isEndForGhosts()) {
+                    Long numberOfStepsBeforeCycle = stepsToNodeByInstructionsCounter.get(currentNode).getOrDefault(instructions.counter, -1L);
+                    if (numberOfStepsBeforeCycle > 0) {
+                        log.info("Cycle for node {}, starts after: {}", currentNode.name, steps - stepsToNodeByInstructionsCounter.get(currentNode).get(instructions.counter));
+                        break;
+                    }
+                    stepsToNodeByInstructionsCounter.get(currentNode).put(instructions.counter, steps);
+                }
+            }
         }
+        log.info("{}", stepsToNodeByInstructionsCounter);
+        var matchingStepNumber = stepsToNodeByInstructionsCounter.values().stream()
+                .map(Map::values)
+                .peek(value -> log.info("Values: {}", value))
+                .reduce(new ArrayList<>(stepsToNodeByInstructionsCounter.values()).get(0).values(), (partial, current) -> {partial.retainAll(current); return partial;});
 
-        return -1;
+        return matchingStepNumber.stream().findFirst().orElse(-1L);
     }
 
     private static class Instructions
@@ -91,6 +119,10 @@ class PuzzleSolver
                 counter = 0;
             }
             return result;
+        }
+
+        private void reset() {
+            counter = 0;
         }
     }
 
