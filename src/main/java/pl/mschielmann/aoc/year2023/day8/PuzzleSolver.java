@@ -2,6 +2,7 @@ package pl.mschielmann.aoc.year2023.day8;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,24 +86,31 @@ class PuzzleSolver
                     Long numberOfStepsBeforeCycle = stepsToNodeByInstructionsCounter.get(currentNode).getOrDefault(instructions.counter, -1L);
                     if (numberOfStepsBeforeCycle > 0)
                     {
-                        log.info("Cycle for node {}, starts after: {}", currentNode.name, steps - stepsToNodeByInstructionsCounter.get(currentNode).get(instructions.counter));
                         break;
                     }
                     stepsToNodeByInstructionsCounter.get(currentNode).put(instructions.counter, steps);
                 }
             }
         }
-        log.info("{}", stepsToNodeByInstructionsCounter);
-        var matchingStepNumber = stepsToNodeByInstructionsCounter.values().stream()
+        List<Long> stepsToCyclePerNode = stepsToNodeByInstructionsCounter.values().stream()
                 .map(Map::values)
-                .peek(value -> log.info("Values: {}", value))
-                .reduce(new ArrayList<>(stepsToNodeByInstructionsCounter.values()).get(0).values(), (partial, current) ->
-                {
-                    partial.retainAll(current);
-                    return partial;
-                });
+                .map(list -> new ArrayList<>(list).get(0))
+                .toList();
 
-        return matchingStepNumber.stream().findFirst().orElse(-1L);
+        BigInteger leastCommonDenominator = BigInteger.ONE;
+        for (Long number : stepsToCyclePerNode)
+        {
+            leastCommonDenominator = lcm(leastCommonDenominator, BigInteger.valueOf(number));
+        }
+
+        return leastCommonDenominator.longValue();
+    }
+
+    private BigInteger lcm(BigInteger number1, BigInteger number2)
+    {
+        BigInteger gcd = number1.gcd(number2);
+        BigInteger absProduct = number1.multiply(number2).abs();
+        return absProduct.divide(gcd);
     }
 
     private static class Instructions

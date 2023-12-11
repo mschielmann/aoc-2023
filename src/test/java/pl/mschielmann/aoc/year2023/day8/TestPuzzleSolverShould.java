@@ -1,6 +1,5 @@
 package pl.mschielmann.aoc.year2023.day8;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +47,6 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    @Disabled
     void solvePartTwoWithTestData3()
     {
         // GIVEN
@@ -62,7 +60,6 @@ class TestPuzzleSolverShould
     }
 
     @Test
-    @Disabled
     void solvePartTwoWithActualData()
     {
         // GIVEN
@@ -72,7 +69,7 @@ class TestPuzzleSolverShould
         long result = puzzleSolver.solvePartTwo();
 
         // THEN
-        assertThat(result).isEqualTo(0L);
+        assertThat(result).isEqualTo(22289513667691L);
     }
 
     private static final String TEST_INPUT_1 = """
