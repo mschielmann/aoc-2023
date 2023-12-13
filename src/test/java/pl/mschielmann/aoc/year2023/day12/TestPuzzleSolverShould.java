@@ -1,6 +1,5 @@
 package pl.mschielmann.aoc.year2023.day12;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

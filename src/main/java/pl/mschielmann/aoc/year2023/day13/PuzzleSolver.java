@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 class PuzzleSolver
@@ -20,7 +19,7 @@ class PuzzleSolver
     {
         return createLavaMapsOf(puzzleInput.lines().toList())
                 .stream()
-                .map(map -> getReflection2(map, false, 0))
+                .map(map -> getReflection(map, false, 0))
                 .mapToLong(Long::valueOf)
                 .sum();
     }
@@ -29,98 +28,72 @@ class PuzzleSolver
     {
         return createLavaMapsOf(puzzleInput.lines().toList())
                 .stream()
-                .map(map -> getReflection2(map, false, 1))
+                .map(map -> getReflection(map, false, 1))
                 .mapToLong(Long::valueOf)
                 .sum();
     }
 
-    private Long getReflection(LavaMap lavaMap, boolean transposed)
+    private Long getReflection(LavaMap lavaMap, boolean transposed, int expectedDifferenceInRow)
     {
         List<String> rows = lavaMap.rows();
-        Long result = null;
-        for (int reflectionCandidateIndex = 1; reflectionCandidateIndex < rows.size(); reflectionCandidateIndex++)
+        Long result = findRowIndexOfSymmetry(expectedDifferenceInRow, rows);
+
+        if (result == null)
         {
-            boolean candidateIsReflection = true;
-            for (int reflectionCounter = 0; reflectionCounter < 10000; reflectionCounter++)
-            {
-                try
-                {
-                    String row1 = rows.get(reflectionCandidateIndex + reflectionCounter);
-                    String row2 = rows.get(reflectionCandidateIndex - reflectionCounter - 1);
-                    if (!row1.equals(row2))
-                    {
-                        candidateIsReflection = false;
-                        break;
-                    }
-                } catch (IndexOutOfBoundsException e)
-                {
-                    //log.info("I think we have our reflection!" + reflectionCandidateIndex);
-                    break;
-                }
-            }
-            if (candidateIsReflection)
-            {
-                result = (long) reflectionCandidateIndex;
-                break;
-            }
+            return getReflection(lavaMap.transpose(), true, expectedDifferenceInRow);
         }
-        if (result == null) {
-            return getReflection(lavaMap.transpose(), true);
-        }
-        if (transposed) {
-            return result;
-        }
-        return result * 100;
+        return transposed ? result : result * 100;
     }
 
-    private Long getReflection2(LavaMap lavaMap, boolean transposed, int expectedDifferenceInRow)
+    private Long findRowIndexOfSymmetry(int expectedDifferenceInRow, List<String> rows)
     {
-        List<String> rows = lavaMap.rows();
-        Long result = null;
         for (int reflectionCandidateIndex = 1; reflectionCandidateIndex < rows.size(); reflectionCandidateIndex++)
         {
             boolean candidateIsReflection = expectedDifferenceInRow == 0;
             boolean oneCharDifferenceUsed = false;
-            for (int reflectionCounter = 0; reflectionCounter < 10000; reflectionCounter++)
+            int reflectionCounter = -1;
+            while (true)
             {
-                try
-                {
-                    String row1 = rows.get(reflectionCandidateIndex + reflectionCounter);
-                    String row2 = rows.get(reflectionCandidateIndex - reflectionCounter - 1);
-                    if (!row1.equals(row2))
-                    {
-                        if (isDifferentByNumberOfChars(row1, row2, expectedDifferenceInRow) && !oneCharDifferenceUsed) {
-                            oneCharDifferenceUsed = true;
-                            candidateIsReflection = true;
-                            continue;
-                        }
-                        candidateIsReflection = false;
-                        break;
-                    }
-                } catch (IndexOutOfBoundsException e)
+                reflectionCounter++;
+                if (reachedMapBorder(reflectionCandidateIndex, reflectionCounter, rows))
                 {
                     break;
                 }
+                String row1 = rows.get(reflectionCandidateIndex + reflectionCounter);
+                String row2 = rows.get(reflectionCandidateIndex - reflectionCounter - 1);
+                if (!row1.equals(row2))
+                {
+                    if (isDifferentByNumberOfChars(row1, row2, expectedDifferenceInRow) && !oneCharDifferenceUsed)
+                    {
+                        oneCharDifferenceUsed = true;
+                        candidateIsReflection = true;
+                        continue;
+                    }
+                    candidateIsReflection = false;
+                    break;
+                }
             }
+
             if (candidateIsReflection)
             {
-                result = (long) reflectionCandidateIndex;
-                break;
+                return (long) reflectionCandidateIndex;
             }
         }
-        if (result == null) {
-            return getReflection2(lavaMap.transpose(), true, expectedDifferenceInRow);
-        }
-        if (transposed) {
-            return result;
-        }
-        return result * 100;
+        return null;
     }
 
-    private boolean isDifferentByNumberOfChars(String input1, String input2, int expectedDifference) {
+    private boolean reachedMapBorder(int reflectionCandidateIndex, int reflectionCounter, List<String> rows)
+    {
+        return reflectionCandidateIndex + reflectionCounter >= rows.size() || reflectionCandidateIndex - reflectionCounter - 1 < 0;
+    }
+
+    private boolean isDifferentByNumberOfChars(String input1, String input2, int expectedDifference)
+    {
         int difference = 0;
-        for (int index = 0; index < input1.length(); index++) {
-            if (input1.charAt(index) != input2.charAt(index)) {
+        for (int index = 0; index < input1.length(); index++)
+        {
+            if (input1.charAt(index) != input2.charAt(index))
+            {
                 difference++;
             }
         }
