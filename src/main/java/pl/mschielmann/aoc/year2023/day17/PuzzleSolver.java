@@ -78,24 +78,24 @@ class PuzzleSolver
 
     private record Path(List<City> visitedCities, Direction lastDirection, int lastDirectionCount)
     {
-/*        List<Path> possiblePaths(TrafficMap trafficMap)
+        List<Path> possiblePaths(TrafficMap trafficMap)
         {
             City lastCity = visitedCities.getLast();
             return Arrays.stream(Direction.values())
                     .filter(lastDirection::isNotOpposite)
                     .filter(direction -> lastDirectionCount < 3 || !direction.equals(lastDirection))
-                    .map(direction -> new Movement(trafficMap.getNextCityFor(lastCity, direction), direction))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(this::withNewCity)
+                    .map(direction ->
+                    {
+                        City nextCity = trafficMap.getNextCityFor(lastCity, direction).orElse(null);
+                        if (nextCity == null)
+                        {
+                            return null;
+                        }
+                        visitedCities.add(nextCity);
+                        return new Path(visitedCities, direction, lastDirection.equals(direction) ? lastDirectionCount + 1 : 0);
+                    })
                     .toList();
 
-        }
-*/
-        private Path withNewCity(City city)
-        {
-            Direction direction = Direction.between(visitedCities.getLast(), city);
-            return null;
         }
 
         long currentCost()
@@ -104,10 +104,6 @@ class PuzzleSolver
                     .mapToLong(city -> (long) city.energyLossValue())
                     .sum();
         }
-    }
-
-    private record Movement(Direction direction, City nextCity)
-    {
     }
 
     @Getter
