@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 class PuzzleSolver
@@ -40,31 +42,48 @@ class PuzzleSolver
 
     BigDecimal solvePartTwo()
     {
-        MapOfGardens mapOfGardens = MapOfGardens.createFrom(puzzleInput.lines().toList());
-        Map<Integer, Map<Integer, BigDecimal>> currentPositions = new HashMap<>();
+
+        return BigDecimal.ZERO;
+    }
+
+    private int countStepsToFillAreaFromCorner(MapOfGardens mapOfGardens, int rowStart, int columnStart, long numberOfOddPositions, long numberOfEvenPositions)
+    {
+        Map<Integer, Set<Integer>> currentPositionsEvenStep = new HashMap<>();
+        Map<Integer, Set<Integer>> currentPositionsOddStep = new HashMap<>();
+        boolean evenStepsMaxReached;
+        int stepCounter;
+        boolean oddStepsMaxReached;
         for (int rowCounter = 0; rowCounter < mapOfGardens.layout.size(); rowCounter++)
         {
-            currentPositions.put(rowCounter, new HashMap<>());
-            for (int columnNumber : mapOfGardens.layout.get(rowCounter))
-            {
-                currentPositions.get(rowCounter).put(columnNumber, BigDecimal.ZERO);
-            }
+            currentPositionsOddStep.put(rowCounter, new HashSet<>());
+            currentPositionsEvenStep.put(rowCounter, new HashSet<>());
         }
-        currentPositions.get(mapOfGardens.startingRow()).put(mapOfGardens.startingColumn(), BigDecimal.ONE);
-        for (int stepCounter = 0; stepCounter < numberOfSteps; stepCounter++)
+        currentPositionsOddStep.get(rowStart).add(columnStart);
+        currentPositionsEvenStep.get(rowStart).add(columnStart);
+        oddStepsMaxReached = false;
+        evenStepsMaxReached = false;
+        stepCounter = 0;
+        while (!oddStepsMaxReached || !evenStepsMaxReached)
         {
-            try
+            stepCounter++;
+
+            if (stepCounter % 2 == 1)
             {
-                currentPositions = move2(currentPositions, mapOfGardens);
-            }
-            catch (NullPointerException e)
+                currentPositionsOddStep = move(currentPositionsEvenStep, mapOfGardens);
+                if (currentPositionsOddStep.values().stream().mapToLong(Collection::size).sum() == numberOfOddPositions)
+                {
+                    oddStepsMaxReached = true;
+                }
+            } else
             {
-                log.info("{}", stepCounter);
-                log.info("{}", currentPositions);
-                throw e;
+                currentPositionsEvenStep = move(currentPositionsOddStep, mapOfGardens);
+                if (currentPositionsEvenStep.values().stream().mapToLong(Collection::size).sum() == numberOfEvenPositions)
+                {
+                    evenStepsMaxReached = true;
+                }
             }
         }
-        return currentPositions.values().stream().map(columns -> columns.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add)).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return stepCounter;
     }
 
     private Map<Integer, Set<Integer>> move(Map<Integer, Set<Integer>> currentPositions, MapOfGardens mapOfGardens)
@@ -77,7 +96,6 @@ class PuzzleSolver
 
         for (int rowCounter : currentPositions.keySet())
         {
-            //log.info("{}-{}", rowCounter, currentPositions.get(rowCounter));
             for (int columnIndex : currentPositions.get(rowCounter))
             {
                 if (mapOfGardens.hasGardenAt(rowCounter - 1, columnIndex))

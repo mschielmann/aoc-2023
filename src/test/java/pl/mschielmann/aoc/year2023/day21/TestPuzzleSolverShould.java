@@ -14,7 +14,7 @@ class TestPuzzleSolverShould
     void solvePartOneWithTestData1()
     {
         // GIVEN
-        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT, 13);
+        PuzzleSolver puzzleSolver = new PuzzleSolver(TEST_INPUT, 6);
 
         // WHEN
         long result = puzzleSolver.solvePartOne();
